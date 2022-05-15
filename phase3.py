@@ -52,11 +52,12 @@ class Graph2(Graph):
         connected, that is, there is a path from any vertex to any other vertex
         in the graph.
         """
+        # Simply apply the function min_number_edges() and check if every combination of edges has an actual value...
         for v in self._vertices:
             for w in self._vertices:
-                if self.min_number_edges(v, w) == sys.maxsize:
-                    return False
-        return True
+                if self.min_number_edges(v, w) == sys.maxsize:  # ...and, if it doesn't...
+                    return False  # ...then the graph is not (strongly) connected
+        return True  # The graph is (strongly) connected otherwise
 
     # Auxiliary functions
     def dijkstra(self, start, end) -> dict:
