@@ -1,58 +1,68 @@
+import sys
 from graph import AdjacentVertex
 from graph import Graph
 
 class Graph2(Graph):
     def min_number_edges(self, start: str, end: str) -> int:
         """returns the minimum number of edges from start to end"""
-        visited = [] # Declare a list of booleans to check the visited vertices
-        count = -1
-        for v in self._vertices:
-            visited.append(False)   # For now, no vertices have been visited
-            count += 1
-            if v.__eq__(start): # If this vertex is the one we start at, we save it and its index in the visited list
-                vertex = v
-                c = count
-        order = self.DFS(vertex, end, c, visited)   # Perform a DFS search to traverse the subgraph
-        # print(order)
-        # ¿Y si llamásemos a la función varias veces con sus adjacent q no sean el q está primero?
-        num = -1
-        for v in order:
-            num += 1
+        # Firstly, we check both start and end are in the graph
+        error = -1
+        for v in self._vertices.keys():
+            if v.__eq__(start):
+                error = 0
             if v.__eq__(end):
-                return num
+                error = 0
+                vertex = v  # save the vertex of the string end
+        if error == -1:
+            print("Error: Invalid vertex")
+            return -1
 
-    def DFS(self, vertex, end, c, visited: list):
-        "Performs a DFS search of the indicated subgraph"
-        order = []  # Declare the list that will contain the DFS
-        return self.dfs(vertex, end, c, visited, order)
+        # We perform the Dijkstra algorithm to find the smallest path when all edges have weight 1
+        distances = self.dijkstra(start, end)
+        mne = distances[vertex] # We are only interested in the distance from start to end
 
-    def dfs(self, vertex, end, c, visited, order):
-        # Otra opción es buscar una condición que ponerle a un nodo para que se considere visitado
-        visited[c] = True
-        # print(vertex)
-        order.append(vertex)    # As we visit the node, we append it to our list
-        # print(order)
-        for v in self.getAdjacents(vertex):
-            count = -1
-            for x in self._vertices:
-                count += 1
-                if x.__eq__(v):
-                    c = count
-            if visited[c] == False: # como ignora los vertices q ya ha visitado, si hay una ruta alternativa mas corta no la considera
-                self.dfs(v, end, c, visited, order)
-            else:
-                ... # Creo q aquí falta alguna linea hdp, o tal vez un poco mas arriba
-            # O bien metemos más en la lista y luego vemos cuando se repite la q estamos buscando y de alguna manera restamos
-            # o intentamos vaciar la lista cuando vuelva a aparecer end, el problema es q no hay forma de llegar (o al menos yo no la encuentro)
+        return mne
 
-        return order
+
+    def dijkstra(self, start, end) -> dict:
+        visited = {}  # Declare a list of booleans to check the visited vertices
+        previous = {}  # Declare a list of vertices where we will store the previous node for each node
+        distances = {}  # Declare a list of integers where we will store the distances between vertices
+        for v in self._vertices.keys():
+            visited[v] = False  # For now, no vertices have been visited
+            previous[v] = None  # For now, we define the previous vertex for any vertex as None
+            distances[v] = sys.maxsize  # We will start with the maximum possible size in all distances (for comparing)
+        distances[start] = 0
+        below = -1  # To check whether the path we are looking exists
+
+        for v in self._vertices:
+            min = sys.maxsize   # To compare with the distances
+            for vertex in self._vertices.keys():
+                if distances[vertex] <= min and visited[vertex] == False:
+                    min = distances[vertex]  # Update the new smallest
+                    min_vertex = vertex  # Update the index of the smallest
+            visited[min_vertex] = True  # Mark the vertex as visited
+            for a in self.getAdjacents(min_vertex):
+                if a == end:
+                    below = 0   # We have to take into account the case where there is no way to get from start to end
+                w = 1   # The weight will be always 1
+                if visited[a] == False and distances[a] > distances[min_vertex]:
+                    distances[a] = distances[min_vertex] + w    # Update the distance
+                    previous[a] = min_vertex    # Update the previous vertex from where we got the new distance
+
+        # If the end vertex was not visited, we say its distance is 0
+        if below == -1:
+            distances[end] = 0
+
+        return distances
 
     def getAdjacents(self, vertex) -> list:
-        ads = []
-        for v in self._vertices:
+        ads = []    # Declare the list
+        for v in self._vertices.keys():
             # All vertices adjacent to vertex will be appended to the list
             if self.contain_edge(vertex, v):    # We append it if the graph contains the edge that unites them
                 ads.append(v)
+
         return ads
 
 
