@@ -1,5 +1,10 @@
+# CODE BY: Laura Belizón Merchán and Jorge Lázaro Ruiz
+# USAGE OF THIS CODE IS STRICTLY FOR REFERENCE ONLY, DO NOT COPY
+
+
 import sys
 
+# File "graph" provided by the professors
 from graph import Graph
 
 
